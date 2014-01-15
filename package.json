@@ -1,0 +1,12 @@
+﻿{
+    "name": "alexsalas.brackets-jekyll",
+    "title": "Jekyll",
+    "description": "An extension to build Github-Pages easy.",
+    "homepage": "https://github.com/alexsalas/alexsalas.brackets-jekyll",
+    "version": "1.0.0",
+    "author": "Alexander Salas <a.salas@ieee.org> (http://alexandersalas.name)",
+    "license": "GPLv3",
+    "engines": {
+        "brackets": ">=0.35.0"
+    }
+}
