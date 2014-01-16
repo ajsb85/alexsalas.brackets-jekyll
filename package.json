@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "alexsalas.brackets-jekyll",
     "title": "Jekyll",
     "description": "An extension to build Github-Pages easy.",
@@ -8,5 +8,10 @@
     "license": "GPLv3",
     "engines": {
         "brackets": ">=0.35.0"
-    }
+    },
+  "keywords": [
+    "jekyll",
+    "github",
+    "pages"
+  ]
 }
