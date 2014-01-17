@@ -13,6 +13,7 @@ define(function (require, exports, module) {
 		ExtensionUtils  		= brackets.getModule("utils/ExtensionUtils"),
 		Dialogs					= brackets.getModule("widgets/Dialogs"),
 		NodeConnection  		= brackets.getModule("utils/NodeConnection"),
+		NativeFileSystem  		= brackets.getModule("filesystem/FileSystem"),
 		nodeConnection  		= new NodeConnection(),
 		domainPath				= ExtensionUtils.getModulePath(module) + "domain",
 		JekyllMenuID			= "jekyll-menu",
@@ -109,8 +110,6 @@ define(function (require, exports, module) {
 						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Error", "Please enter the XML file of your blog’s content.");
 						return;
 					}
-					console.log(source.value);
-					console.log(blog.value);
 					
 					nodeConnection.connect(true).fail(function (err) {
 						console.error("[[Brackets Jekyll]] Cannot connect to node: ", err);
@@ -119,9 +118,13 @@ define(function (require, exports, module) {
 							console.error("[[Brackets Jekyll]] Cannot register domain: ", err);
 						});
 					}).then(function () {
-						nodeConnection.domains["jekyll.execute"].jekyll(curProjectDir, 'bundle exec jekyll import '+ blog.value + ' --source ' + source.value)
+						console.log('bundle exec jekyll import '+ blog.value + ' --source "' + source.value +'"');
+						curProjectDir = ProjectManager.getProjectRoot().fullPath;
+						console.log(curProjectDir);
+						nodeConnection.domains["jekyll.execute"].jekyll(curProjectDir, 'bundle exec jekyll import '+ blog.value + ' --source "' + source.value +'"')
 						.fail(function (err) {
-							console.error("[[Brackets Jekyll]] fail: ", err);
+							console.warn("[[Brackets Jekyll]] fail: ", err);
+							Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Jekyll Import", err);
 						})
 						.then(function (data) {
 							console.log("[[Brackets Jekyll]] then: " + data);
@@ -141,8 +144,20 @@ define(function (require, exports, module) {
 				});
 				
 				// It's important to get the elements after the modal is rendered but before the done event
-				var source = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .source"),
-					blog = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .blog");
+				var blog = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .blog"), 
+					filename = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .filename"),
+					source = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .path");
+				$("." + JEKYLL_IMPORT_DIALOG_ID + " .source").on("click", function() { 
+					NativeFileSystem.showOpenDialog(false, false, "Please select source to import",'',[".xml"],function (file, files){
+						if(typeof files[0] != 'undefined'){
+							source.value = files[0];
+							var name = files[0].replace(/^.*[\\\/]/, '');
+							filename.innerHTML = name;
+						}
+					});
+					//(allowMultipleSelection, chooseDirectories, title, initialPath, fileTypes, callback)
+				})
+				
 			}
         }
     };

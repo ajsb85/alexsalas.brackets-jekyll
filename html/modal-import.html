@@ -4,13 +4,23 @@
             <label>Importer:
 			<select class="blog">
 			  <option value="wordpressdotcom">Wordpress.com</option>
+			  <option value="googlereader">GoogleReader</option>
+			  <option value="ghost">Ghost</option>
+			  <option value="csv">CSV</option>
+			  <option value="rss">RSS</option>
+			  <option value="s9y">S9Y</option>
 			</select>
 			</label>
         </td>
     </tr>
     <tr>
         <td>
-            <label>Source: <input type="file" placeholder="wordpress.xml" class="source" style="width: 530px"></label>
+			<label>Source: <input type="button" class="source" value="Choose File" /> <span class="filename">No file chosen</span></label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+			<label>Url: <input type="text" placeholder="No file chosen" class="path" style="width: 500px"></label>
         </td>
     </tr>
 </table>
