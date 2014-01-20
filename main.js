@@ -7,6 +7,7 @@ define(function (require, exports, module) {
 
     /** --- MODULES --- **/
     var CommandManager  		= brackets.getModule("command/CommandManager"),
+		DocumentManager     	= brackets.getModule("document/DocumentManager"),
 		Commands                = brackets.getModule("command/Commands"),
         Menus           		= brackets.getModule("command/Menus"),
 		ProjectManager        	= brackets.getModule("project/ProjectManager"),
@@ -14,6 +15,8 @@ define(function (require, exports, module) {
 		Dialogs					= brackets.getModule("widgets/Dialogs"),
 		NodeConnection  		= brackets.getModule("utils/NodeConnection"),
 		NativeFileSystem  		= brackets.getModule("filesystem/FileSystem"),
+		EditorManager       	= brackets.getModule("editor/EditorManager"),
+		FileUtils 				= brackets.getModule("file/FileUtils"),
 		nodeConnection  		= new NodeConnection(),
 		domainPath				= ExtensionUtils.getModulePath(module) + "domain",
 		JekyllMenuID			= "jekyll-menu",
@@ -58,16 +61,41 @@ define(function (require, exports, module) {
 					console.error("[[Brackets Jekyll]] Cannot register domain: ", err);
 				});
 			}).then(function () {
-				nodeConnection.domains["jekyll.execute"].jekyll(curProjectDir, 'bundle exec jekyll new '+ curProjectDir)
+				nodeConnection.domains["jekyll.execute"].jekyll(curProjectDir, 'jekyll new '+ curProjectDir)
 				.fail(function (err) {
 					console.error("[[Brackets Jekyll]] fail: ", err);
+					if(err.search("Conflict")!=-1){
+						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Jekyll Site", curProjectDir + " is not empty")
+					}
 				})
 				.then(function (data) {
 					console.log("[[Brackets Jekyll]] then: " + data);
-					Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Jekyll Site", data).done(function () {
-						ProjectManager.refreshFileTree();
-						//ProjectManager.openProject(curProjectDir);
-						//CommandManager.execute(Commands.APP_RELOAD);
+					nodeConnection.domains["jekyll.execute"].jekyll(curProjectDir, 'bundle init')
+					.fail(function (err) {
+						console.error("[[Brackets Jekyll]] fail: ", err);
+					})
+					.then(function (data2) {
+						console.log("[[Brackets Jekyll]] then: " + data2);
+						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Jekyll Site", data + '\r\n' + data2).done(function () {
+							//ProjectManager.refreshFileTree();
+							//ProjectManager.openProject(curProjectDir);
+							//CommandManager.execute(Commands.APP_RELOAD);
+							// On Windows, paths look like "C:/foo/bar.txt"
+							// On Mac, paths look like "/foo/bar.txt"
+							var file = NativeFileSystem.getFileForPath(curProjectDir + 'Gemfile');
+
+							var promise = FileUtils.readAsText(file);  // completes asynchronously
+							promise.done(function (text) {
+								console.log("The contents of the file are:\n" + text);
+							})
+							.fail(function (errorCode) {
+								console.log("Error #" + errorCode);  // one of the FileSystemError constants
+							});
+							 //console.log(doc);
+							 //doc.replaceRange("//Black magic. Do not modify EVER", 6);
+							//EditorManager.getCustomViewerForPath(curProjectDir + 'Gemfile');
+							
+						});
 					});
 				});
 			}).done();
