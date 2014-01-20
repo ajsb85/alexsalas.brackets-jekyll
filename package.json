@@ -4,14 +4,31 @@
     "description": "An extension to build Github-Pages easy.",
     "homepage": "https://github.com/alexsalas/alexsalas.brackets-jekyll",
     "version": "1.0.0",
-    "author": "Alexander Salas <a.salas@ieee.org> (http://alexandersalas.name)",
+	"categories": ["general", "external"],
+    "author": {
+        "name": "Alexander Salas",
+        "email": "a.salas@ieee.org",
+        "url": "http://alexandersalas.name"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alexsalas/alexsalas.brackets-jekyll.git"
+    },
+    "bugs": {
+        "url": "https://github.com/alexsalas.brackets-jekyll/issues",
+        "email": "a.salas@ieee.org"
+    },
     "license": "GPLv3",
     "engines": {
         "brackets": ">=0.35.0"
     },
-  "keywords": [
-    "jekyll",
-    "github",
-    "pages"
-  ]
+	"keywords": [
+		"jekyll",
+		"github",
+		"pages"
+	],
+	"dependencies": {
+	},
+	"devDependencies": {
+	}
 }

@@ -29,6 +29,8 @@ define(function (require, exports, module) {
     function handleJekyllServe() {
         window.alert("ToDo: bundle exec jekyll serve -t -w");
     }
+	
+	//JSON.parse(require('text!builder.json'))
 
 	function handleJekyllDoctor() {
  		curProjectDir = ProjectManager.getProjectRoot().fullPath;
@@ -77,20 +79,25 @@ define(function (require, exports, module) {
 					.then(function (data2) {
 						console.log("[[Brackets Jekyll]] then: " + data2);
 						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Jekyll Site", data + '\r\n' + data2).done(function () {
-							//ProjectManager.refreshFileTree();
-							//ProjectManager.openProject(curProjectDir);
-							//CommandManager.execute(Commands.APP_RELOAD);
-							// On Windows, paths look like "C:/foo/bar.txt"
-							// On Mac, paths look like "/foo/bar.txt"
-							var file = NativeFileSystem.getFileForPath(curProjectDir + 'Gemfile');
-
+							ProjectManager.refreshFileTree();
+ 							var file = NativeFileSystem.getFileForPath(curProjectDir + 'Gemfile');
 							var promise = FileUtils.readAsText(file);  // completes asynchronously
 							promise.done(function (text) {
-								console.log("The contents of the file are:\n" + text);
+								FileUtils.writeText(file, text + "gem 'github-pages'\r\ngem 'wdm'", false).done(function(){
+									DocumentManager.getDocumentForPath(curProjectDir + 'Gemfile').done(
+										function (doc) {
+											DocumentManager.addToWorkingSet(file);
+											DocumentManager.setCurrentDocument(doc);
+										}
+									);
+								});
 							})
 							.fail(function (errorCode) {
 								console.log("Error #" + errorCode);  // one of the FileSystemError constants
-							});
+							}); 
+							
+							//var src = FileUtils.getNativeModuleDirectoryPath(module) + "/builder.json";
+
 							 //console.log(doc);
 							 //doc.replaceRange("//Black magic. Do not modify EVER", 6);
 							//EditorManager.getCustomViewerForPath(curProjectDir + 'Gemfile');
@@ -135,7 +142,7 @@ define(function (require, exports, module) {
 					
 					// Module name musn't be empty
 					if(source.value == "") {
-						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Error", "Please enter the XML file of your blog’s content.");
+						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Error", "Please enter the XML file of your blog's content.");
 						return;
 					}
 					
@@ -187,6 +194,82 @@ define(function (require, exports, module) {
 				})
 				
 			}
+        },
+		about: {
+			
+            /**
+             * HTML put inside the dialog
+             */
+            html: require("text!html/modal-about.html"),
+            
+			/**
+			 * Opens up the modal
+			 */
+			show: function() {
+				
+                Dialogs.showModalDialog(
+                    JEKYLL_IMPORT_DIALOG_ID, // ID the specify the dialog
+                    "Contact with the developer", // Title
+                    this.html,               // HTML-Content
+                    [                        // Buttons
+                        {className: Dialogs.DIALOG_BTN_CLASS_PRIMARY, id: Dialogs.DIALOG_BTN_OK, text: "Enviar"},
+                        {className: Dialogs.DIALOG_BTN_CLASS_NORMAL, id: Dialogs.DIALOG_BTN_CANCEL, text: "Cancel"}
+                    ]
+                ).done(function(id) {
+					
+					// Only saving
+					if(id !== "ok") return;
+					
+					// Module name musn't be empty
+					if(email.value == "") {
+						Dialogs.showModalDialog(Dialogs.DIALOG_ID_ERROR, "Error", "Please enter your valid email.");
+						return;
+					}
+					
+					$.ajax({
+					  type: "POST",
+					  url: "https://mandrillapp.com/api/1.0/messages/send.json",
+					  data: {
+						'key': 'FtgWBNlvJIsLLVOgl5LpXw',
+						'message': {
+						  'from_email': email.value,
+						  'from_name': 'User Jekyll Brackets',
+						  'to': [
+							  {
+								'email': 'alexander.salas@gmail.com',
+								'name': 'Alexander Salas',
+								'type': 'to'
+							  }
+							],
+							'headers': {
+								'Reply-To': 'a.salas@ieee.org'
+							},
+							"important": false,
+						  'autotext': 'true',
+						  'bcc_address': email.value,
+						  'subject': 'Jekyll Brakets Extension',
+						  'html': body.value
+						}
+					  }
+					 }).done(function(response) {
+					   console.log(response); // if you're into that sorta thing
+					 });
+					
+				});
+				
+				// It's important to get the elements after the modal is rendered but before the done event
+				var email = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .email"), 
+					body = document.querySelector("." + JEKYLL_IMPORT_DIALOG_ID + " .body");
+					
+					$.ajax({
+					  type: "GET",
+					  url: "http://gravatar.com/4a14258e09d19be8002d418c9a633baa.json"
+					 }).done(function(response) {
+					   console.log(response); // if you're into that sorta thing
+					   console.log(response.entry[0].displayName);
+					 });
+				
+			}
         }
     };
     
@@ -203,6 +286,10 @@ define(function (require, exports, module) {
 	});
     var JEKYLL_NEW_CMD_ID = "jekyll.new";   // package-style naming to avoid collisions
 	CommandManager.register("New site scaffold", JEKYLL_NEW_CMD_ID, handleJekyllNewSite);
+    var JEKYLL_ABOUT_CMD_ID = "jekyll.about";   // package-style naming to avoid collisions
+	CommandManager.register("About this extension", JEKYLL_ABOUT_CMD_ID, function() {
+		Dialog.about.show();
+	});
 	
 /*     
 	build                Build your site
@@ -222,4 +309,5 @@ define(function (require, exports, module) {
 	JekyllMenu.addMenuItem(JEKYLL_IMPORT_CMD_ID);
 	JekyllMenu.addMenuDivider();
 	JekyllMenu.addMenuItem(JEKYLL_DOCS_CMD_ID);
+	JekyllMenu.addMenuItem(JEKYLL_ABOUT_CMD_ID);
 });
