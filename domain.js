@@ -7,7 +7,7 @@
         domainName = "jekyll.execute";
 
     function jekyll(directory, command, callback) {
-        child_process.exec(command, { cwd: directory}, function (err, stdout, stderr) {
+        var grep = child_process.exec(command, { cwd: directory}, function (err, stdout, stderr) {
             callback(err ? stderr : undefined, err ? undefined : stdout);
         });
     }
