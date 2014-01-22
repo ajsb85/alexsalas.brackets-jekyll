@@ -12,7 +12,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/alexsalas/alexsalas.brackets-jekyll.git"
+        "url": "https://github.com/alexsalas/alexsalas.brackets-jekyll.git",
+		"release_id": "128876"
     },
     "bugs": {
         "url": "https://github.com/alexsalas.brackets-jekyll/issues",

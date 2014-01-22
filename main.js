@@ -300,9 +300,9 @@ define(function (require, exports, module) {
                         {className: Dialogs.DIALOG_BTN_CLASS_NORMAL, id: Dialogs.DIALOG_BTN_CANCEL, text: "Cancel"}
                     ]
                 ).done(function(id) {
-					console.log(id);
 					// Only saving
-					if(id !== "ok" && !buttonSend) return;
+					if(id !== "ok") return;
+					if(!buttonSend) return;
 					
 					// Module name musn't be empty
 					if(email.value == "") {
@@ -342,6 +342,8 @@ define(function (require, exports, module) {
 				var email = document.querySelector("." + JEKYLL_ABOUT_DIALOG_ID + " .email"), 
 					contributors = document.querySelector("." + JEKYLL_ABOUT_DIALOG_ID + " .about-contributors"),
 					$table = $("." + JEKYLL_ABOUT_DIALOG_ID + " .table"),
+					$version = $("." + JEKYLL_ABOUT_DIALOG_ID + " .version"),
+					$description = $("." + JEKYLL_ABOUT_DIALOG_ID + " .description"),
 					$about = $("." + JEKYLL_ABOUT_DIALOG_ID + " .about-text"),
 					$message = $("." + JEKYLL_ABOUT_DIALOG_ID + " .message"),
 					body = document.querySelector("." + JEKYLL_ABOUT_DIALOG_ID + " .body");
@@ -370,7 +372,8 @@ define(function (require, exports, module) {
 						}
 					    contributors.innerHTML = html;
 						var ext = JSON.parse(require('text!package.json'));
-						console.log(ext.version);
+						$description.html(ext.description);
+						$version.html(ext.version);
 					 });
 				
 			}
